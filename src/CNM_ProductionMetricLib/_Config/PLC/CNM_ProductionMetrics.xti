@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<TcSmItem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4026.16" ClassName="CNestedPlcProjDef">
+	<Project GUID="{2BBB540B-903B-4903-91F2-57E34AC1FE6E}" Name="CNM_ProductionMetrics" PrjFilePath="..\..\CNM_ProductionMetrics\CNM_ProductionMetrics.plcproj" TmcFilePath="..\..\CNM_ProductionMetrics\CNM_ProductionMetrics.tmc" ReloadTmc="true" AmsPort="851" FileArchiveSettings="#x000e" SymbolicMapping="true">
+		<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcHash="{9F7F4044-DA95-D042-7D88-16F85A4C8A9F}" TmcPath="CNM_ProductionMetrics\CNM_ProductionMetrics.tmc">
+			<Name>CNM_ProductionMetrics Instance</Name>
+			<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
+		</Instance>
+	</Project>
+</TcSmItem>

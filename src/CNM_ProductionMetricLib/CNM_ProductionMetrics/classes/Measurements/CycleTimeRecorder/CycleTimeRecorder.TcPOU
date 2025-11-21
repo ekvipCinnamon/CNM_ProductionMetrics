@@ -1,0 +1,557 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="CycleTimeRecorder" Id="{57f97110-37e7-40a4-8590-b94deb62e819}" SpecialFunc="None">
+    <Declaration><![CDATA[(*
+## Short summary
+
+This class provides the functionalities to measure timespans for processes and commands.
+It can measure processing times (start time -> stop time) and cycle times (last stop time -> stop time).
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2025 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+FUNCTION_BLOCK CycleTimeRecorder EXTENDS CNM_OpModeHandler.AbstractCyclicNode IMPLEMENTS CNM_ProductionMetricInterfaces.ICycleTimeRecorder
+VAR
+	(* current data *)
+	currentCycleTimeData :CNM_ProductionMetricInterfaces.CycleTimeDataStruct;
+	(* queue for the measurements *)
+	dataSetList :CNM_Collections.LinkedList;
+	(* the variable that is used as data slot to provide data for the database *)
+	{ attribute 'TcHmiSymbol.ShowRecursively' }
+	cycleTimeRecord :CNM_ProductionMetricInterfaces.CycleTimeDataStruct;
+	(* mailbox flag for the database that we have a new entry, should be reset by the server when data was read *)
+	{ attribute 'TcHmiSymbol.Show' }
+	newDataAvailable :BOOL := FALSE;
+	(* command delegates *)
+	cycleTimeCommands :CycleTimeRecorderCommands;
+	(* error for failed queryInterface *)
+	interfaceQueryFailedAlarm :CNM_ConcreteMessages.TcError(
+		event := Global.TC_EVENTS.MemoryErrors.CycleTimeRecorderQueryInterfacFailed , 
+		injectedService := THIS^.messageService
+	); 
+	(* error for maximum queue size *)
+	maxQueueSizeAlarm :CNM_ConcreteMessages.TcError(event := Global.TC_EVENTS.MemoryErrors.CycleTimeMaxQueueSize, injectedService := THIS^.messageService);
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="captureCurrentCycle" Id="{9216b523-329b-49fe-99ee-c9684073ddab}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This method creates a new cycle time roecord for the currently produced part by calculating the the passed time since the last call of this method.
+If a new mode is started the last timestamp will be set to the moment when the mode was started.
+
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2025 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+METHOD captureCurrentCycle : CNM_ProductionMetricInterfaces.CNM_ReturnTypes.SingleExecutionResult
+VAR_INPUT
+	(* can be used to provide additional informations for the record, e.g. multiple measurements neccesray or test part *)
+	additionalMessage	: Tc2_System.T_MaxString := '';
+END_VAR
+VAR
+	dto :POINTER TO CycleTimeData;
+	(* data backup to restore timestamps *)
+	backupEndTimestamp :LDT;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[captureCurrentCycle := CNM_ReturnTypes.SingleExecutionResult.ABORTED;
+// check if we can queue the dataset - throw error if the max queuesize is reached
+IF ( THIS^.dataSetList.size >= THIS^.maxQueueSize ) THEN
+	THIS^.maxQueueSizeAlarm.throw();
+	RETURN;
+END_IF
+
+backupEndTimestamp  := THIS^.currentCycleTimeData.endTimestamp;
+THIS^.currentCycleTimeData.cycleTime := 
+	SEL(
+		TO_UDINT(THIS^.currentCycleTimeData.endTimestamp) > 0, 
+		TO_LTIME(0), 
+		TO_LTIME(GetCurrentLTimeStamp() - THIS^.currentCycleTimeData.endTimestamp ));
+THIS^.currentCycleTimeData.endTimestamp := GetCurrentLTimeStamp();
+THIS^.currentCycleTimeData.processingTime := 
+	SEL(
+		TO_UDINT(THIS^.currentCycleTimeData.startTimestamp) > 0, 
+		TO_LTIME(0), 
+		TO_LTIME(THIS^.currentCycleTimeData.endTimestamp - THIS^.currentCycleTimeData.startTimestamp));
+THIS^.currentCycleTimeData.process := THIS^.configuration.process;
+THIS^.currentCycleTimeData.productType := THIS^.configuration.productType;
+THIS^.currentCycleTimeData.targetCycletime := THIS^.configuration.targetCycleTime;
+THIS^.currentCycleTimeData.additionalMessage := additionalMessage;
+dto := __NEW(CycleTimeData(data := THIS^.currentCycleTimeData));
+IF (dto <> 0) THEN
+	captureCurrentCycle := THIS^.dataSetList.append(dto^);
+ELSE
+	// restore data for retry
+	THIS^.currentCycleTimeData.endTimestamp := backupEndTimestamp;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="className" Id="{71967004-2c40-415d-ae93-3ef42dd1b98c}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This abstract property returns the class name of the concrete object, 
+which is useful for logging/debugging purpose or to check the class name
+for ``__DELETE`` in factories (sometimes it's necessary to do more 
+than just to free the memory).
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+PROPERTY className : CNM_AbstractObject.ClassName
+]]></Declaration>
+      <Get Name="Get" Id="{ba8ffa3e-e407-4157-9c9c-032c6203fd82}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[className := 'CycleTimeRecorder';
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="commands" Id="{98f4f425-c88f-4d59-ad34-f3fb647d3912}">
+      <Declaration><![CDATA[(* 
+## Short summary
+
+This is a fluent interface that provides single attempt commands, which can be evaluated by a cycle manager instance.
+### Example 
+```
+	cycleManager.leave(
+		cycleTimeRecorder.commands.captureCurrentCycle(
+			additionalMessage := 'just an example'
+		)
+	);  
+	```
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2025 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+	
+*)
+
+PROPERTY commands : CNM_ProductionMetricInterfaces.ICycleTimeRecorderCommands
+]]></Declaration>
+      <Get Name="Get" Id="{1b6271dd-d49c-4c3d-9df0-a4c2f7f663c7}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[commands := THIS^.cycleTimeCommands;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="configuration" Id="{1ed849c9-16e6-4643-a0aa-1fc2213bd559}">
+      <Declaration><![CDATA[(*
+## Short summary
+
+This property returns an fluent interface for the cycle time recorder configuration.
+The following things should be configured after a type / product / batch change was performed:
+ -product type: either the name of the overall product or the individual feed parts to be processed
+ -targetCycleTime: the target cycle time for this process and product type
+ 
+The process name can be set once during the initialization of the PLC as it usually doesn't change.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2025 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+PROPERTY configuration : CNM_ProductionMetricInterfaces.ICycleTimeConfiguration
+]]></Declaration>
+      <Get Name="Get" Id="{0b760254-9da7-48a3-991f-4d074c57e322}">
+        <Declaration><![CDATA[VAR_INST
+	config :CycleTimeRecorderConfiguration;
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[configuration := config;
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="disable" Id="{84afac3c-c0f6-4147-80bd-5fe1bb130b52}">
+      <Declaration><![CDATA[(* 
+## Short summary
+
+This method disables a node (E.g. axes should be disabled). It can take mutliple cycles. It has to be implemented for every node/device.
+The execute input needs a rising edge to execute the method.
+If there is nothing to disable, just return a 'SUCCESS' state.
+
+This method is called automatically by the operation mode handler.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2024 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+METHOD disable : CNM_ReturnTypes.SingleExecutionState
+VAR_INPUT
+	execute	: BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// nothing to disable
+disable := CNM_ReturnTypes.SingleExecutionState.SUCCESS;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="enable" Id="{00f90cb5-6d2d-47b9-b3e1-786ab0c0aab5}">
+      <Declaration><![CDATA[(* 
+## Short summary
+
+This method enables a node. It can take mutliple cycles. It has to be implemented for every node/device.
+The intention is to enable devices here, e.g. axes, laser, dispenser etc.
+The execute input needs a rising edge to execute the method.
+If there is nothing to enable, just return a 'SUCCESS' state.
+
+This method is called automatically by the operation mode handler.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2024 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+METHOD enable : CNM_ReturnTypes.SingleExecutionState
+VAR_INPUT
+	execute	: BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// nothing to enable
+enable := CNM_ReturnTypes.SingleExecutionState.SUCCESS;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="FB_init" Id="{336ea158-00e0-44d8-b55f-c8631230b6e5}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+The constructor ``FB_init`` is needed to create an unique hash code.
+The hash code is a pseudo random number create with a [xorshift](https://en.wikipedia.org/wiki/Xorshift) algorithm.
+It can be overwritten on derivations, because it will be called implicit, ``SUPER^.FB_init()`` is not required.
+For more information check: [Behavoir with derived function blocks](https://infosys.beckhoff.com/content/1033/tc3_plc_intro/5482088715.html?id=6983869892358031022)
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+
+
+*)
+METHOD FB_init : BOOL
+VAR_INPUT
+	(* if TRUE, the retain variables are initialized (warm start / cold start)*)
+	bInitRetains	: BOOL;
+	(* if TRUE, the instance afterwards gets moved into the copy code (online change) *)
+	bInCopyCode	:BOOL;
+	(* the node were this node should be appended to *)
+	parentNode :CNM_OpModeHandler.INodeInitialization;
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^.hmiInfo.template := 'TimeTrackingRecorder';
+THIS^.isInHome := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="initialize" Id="{0766d4c6-637c-4651-b1f1-922d915b535e}">
+      <Declaration><![CDATA[(* 
+## Short summary
+
+This method contains instructions and sequences for the init mode. 
+This mode is intended for initializing a machine, e.g. loading product type data from recipes, establish a connection to global production systems (MES).
+If the node should do nothing, return a 'SUCCESS'.
+It should run until all initializations are done or the mode is stopped immedtiately or a stop request is raised (THIS^.modeControl.stopRequest). 
+This method is called automatically by the operation mode handler.
+
+**Attention:** If this method returns the state 'ERROR', the operation mode handler automatically disables the whole machine! 
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2024 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+METHOD initialize : CNM_ReturnTypes.SingleExecutionState
+VAR_INPUT
+	execute	: BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^.cycleTimeCommands.setRecorder(THIS^);
+initialize := CNM_ReturnTypes.SingleExecutionState.SUCCESS;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="maxQueueSize" Id="{6da2f266-2dbe-4255-800e-93237c55225e}">
+      <Declaration><![CDATA[(*
+## Short summary
+
+This property getter returns the maximum queue size for the data recorder. 
+If the dataset list has reached this size, no other dataset will be stored and an alarm will be raised.
+For this class the maximum queue size can be configured as library parameter ''QUEUE_SIZE_FOR_DATA_RECORDS_PER_RECORDER''.
+Overwrite this property for extended classes as the default implementation accesses the Parameter List of the CNM_ProductionMetrics library! 
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+PROPERTY PROTECTED maxQueueSize : UDINT
+]]></Declaration>
+      <Get Name="Get" Id="{3f2b7b98-6428-474e-a72c-4b0e59dbc834}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[maxQueueSize := Settings.QUEUE_SIZE_FOR_DATA_RECORDS_PER_RECORDER;
+
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="run" Id="{220767ea-7e6d-47e0-bfdb-fb7cf09c941a}">
+      <Declaration><![CDATA[(* 
+## Short summary
+
+This method will be called in every cycle for a node. It can be used to implement hardware drivers/measurements/monitoring.
+The returned state defines the overall state of the node. It should return BUSY when the node executes a command, otherwise SUCCESS( or IDLE if there is nothing to do). 
+(Simple monitoring is not a command an should return SUCCESS).  
+
+
+**Attention:** the returned SingleExecutionState will be evaluated cyclically wihtin the node tree. 
+In case a node returns an ERROR state, the whole machine will be disabled. 
+Return ERROR only for fatal or critical errors and handle other errors within the node.
+ 
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2025 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+	
+*)
+METHOD run : CNM_ReturnTypes.SingleExecutionState
+VAR_INST
+	cycleManager :CNM_CycleManager.SimpleCycleManager;
+END_VAR
+VAR CONSTANT
+	WAIT_FOR_DATA :DINT := 10;
+	SET_DATA :DINT := 11;
+	DATA_ERROR :DINT := 12;
+	WAIT_DATA_RECEIVED :DINT := 13;
+END_VAR
+VAR
+	data :CNM_ProductionMetricInterfaces.ICycleTimeData;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[cycleManager(execute := TRUE);
+
+CASE cycleManager.step.current OF
+CNM_ReturnTypes.DefaultSteps.STEP.INIT:
+	run := CNM_ReturnTypes.SingleExecutionState.SUCCESS;
+	cycleManager.proceedWith(WAIT_FOR_DATA);
+WAIT_FOR_DATA:
+	run := CNM_ReturnTypes.SingleExecutionState.SUCCESS;
+	IF (THIS^.dataSetList.size > 0) THEN
+		run := CNM_ReturnTypes.SingleExecutionState.BUSY;
+		cycleManager.proceedWith(SET_DATA); 
+	END_IF
+SET_DATA:
+	run := CNM_ReturnTypes.SingleExecutionState.BUSY;
+	IF (__QUERYINTERFACE(THIS^.dataSetList.dequeue(), data)) THEN
+		(* fill dataslot *)
+		THIS^.cycleTimeRecord := data.dataset;
+		(* delete DTO *)
+		data.destruct();
+		(* set mailbox flag *)
+		THIS^.newDataAvailable := TRUE;
+		cycleManager.proceedWith(WAIT_DATA_RECEIVED);
+	ELSE
+		cycleManager.proceedWith(DATA_ERROR);
+	END_IF
+DATA_ERROR:
+	cycleManager.step.next := SET_DATA;
+	cycleManager.handle(THIS^.interfaceQueryFailedAlarm);
+WAIT_DATA_RECEIVED:
+	run := CNM_ReturnTypes.SingleExecutionState.BUSY;
+	IF (NOT THIS^.newDataAvailable) THEN
+		// clear data slot
+		Tc2_System.MEMSET(destAddr := ADR(THIS^.cycleTimeRecord), 0, SIZEOF(THIS^.cycleTimeRecord));
+		run := CNM_ReturnTypes.SingleExecutionState.SUCCESS;
+		cycleManager.proceedWith(WAIT_FOR_DATA);
+	END_IF
+END_CASE
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="startCycle" Id="{bff46e5b-7716-48aa-aa2a-0a46cdd1f938}">
+      <Declaration><![CDATA[(*
+## Short summary
+
+This method can be used to set the cycle start timestamp manually.
+
+**Attention:** If only the captureCurrentCycle method is called, the start timestamp will be set automatically when the previous cycle is done.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2025 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+METHOD startCycle :CNM_ReturnTypes.SingleExecutionResult;
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^.currentCycleTimeData.startTimestamp := GetCurrentLTimeStamp();
+startCycle := CNM_ReturnTypes.SingleExecutionResult.SUCCESS;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="stopImmediate" Id="{240810e4-99fb-40f1-b809-43718734fa6e}">
+      <Declaration><![CDATA[(* 
+## Short summary
+
+This method executes stops all movements of a node. It has to be overwritten for every node. 
+E.g. axes should perform a quickstop, cylinders should be turned off, etc.
+If the node should do nothing, return a 'SUCCESS'.
+It should stop axes/cylinders/process (e.g. laser welding, dispensing) endless until the manual mode is stopped via stop request or immediate stop.
+This method is called automatically by the operation mode handler before disabling the machine or if the operator selects an immediate stop.
+
+**Attention:** If this method returns the state 'ERROR', the operation mode handler automatically disables the whole machine! 
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2024 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+METHOD stopImmediate : CNM_ReturnTypes.SingleExecutionState
+VAR_INPUT
+	execute	: BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// nothing to stop
+stopImmediate := CNM_ReturnTypes.SingleExecutionState.SUCCESS;
+]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

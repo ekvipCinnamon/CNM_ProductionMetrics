@@ -1,0 +1,153 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="CycleTimeRecorderCommands" Id="{80d6ef78-3ed7-45b5-b0ed-cfde5944d415}" SpecialFunc="None">
+    <Declaration><![CDATA[(* 
+## Short summary
+
+This class is a collection of cycle time recorder commands that provides a fluent interface for single attempt commands, which can be evaluated by a cycle manager instance.
+### Example 
+```
+	cycleManager.leave(
+		cycleTimeRecorder.commands.captureCurrentCycle(
+			additionalMessage := 'just an example'
+		)
+	);  
+	```
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2025 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+	
+*)
+
+FUNCTION_BLOCK CycleTimeRecorderCommands EXTENDS CNM_AbstractObject.Object IMPLEMENTS CNM_ProductionMetricInterfaces.ICycleTimeRecorderCommands
+VAR
+	captureCommand :CycleTimeCaptureCycleCommand;
+	startCycleCommand :CycleTimeStartCycleCommand;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="captureCurrentCycle" Id="{36ce3c0c-645d-4958-9780-f1413e0b4917}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This command creates a new cycle time roecord for the currently produced part by calculating the the passed time since the last call of this method.
+If a new mode is started the last timestamp will be set to the moment when the mode was started.
+
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2025 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+METHOD captureCurrentCycle : CNM_CommandInterfaces.ISingleAttempt
+VAR_INPUT
+	(* can be used to provide additional informations for the record, e.g. multiple measurements neccesray or test part *)
+	additionalMessage	: Tc2_System.T_MaxString := '';
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^.captureCommand.setParameters(additionalMessage);
+captureCurrentCycle := THIS^.captureCommand;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="className" Id="{103bc726-3207-4d4b-8fc7-4961401b2bc3}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This abstract property returns the class name of the concrete object, 
+which is useful for logging/debugging purpose or to check the class name
+for ``__DELETE`` in factories (sometimes it's necessary to do more 
+than just to free the memory).
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+PROPERTY className : CNM_AbstractObject.ClassName
+]]></Declaration>
+      <Get Name="Get" Id="{c1691128-5efa-46e9-a8b1-38b100ed71f1}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ className := 'CNM_ProductionMetrics.CycleTimeRecorderCommands';
+ ]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="setRecorder" Id="{2eba39dc-ea7b-4d20-9ded-982797dbe1eb}">
+      <Declaration><![CDATA[METHOD INTERNAL setRecorder : BOOL
+VAR_INPUT
+	recorder :CNM_ProductionMetricInterfaces.ICycleTimeRecorder;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF THIS^.isObjectValid(recorder) THEN
+	THIS^.captureCommand.setRecorder(recorder);
+	THIS^.startCycleCommand.setRecorder(recorder);
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="startCycle" Id="{0a9ca2d5-f14a-4d82-bcfc-124fb4d393e6}">
+      <Declaration><![CDATA[(*
+## Short summary
+
+This command can be used to set the cycle start timestamp manually.
+
+**Attention:** If only the captureCurrentCycle method is called, the start timestamp will be set automatically when the previous cycle is done.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2025 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+METHOD startCycle : CNM_CommandInterfaces.ISingleAttempt
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[startCycle := THIS^.startCycleCommand;
+]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

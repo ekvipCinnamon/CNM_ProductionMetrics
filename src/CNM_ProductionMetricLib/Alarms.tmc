@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<TcModuleClass>
+	<Translations>
+		<Text TxtId="PartTrackerQueryInterfacFailed">
+			<Text LcId="1031"><![CDATA[Interface-Cast von IObject zu IPartTrackingData fehlgeschlagen! Bitte überprüfen Sie mögliche Speicherverwaltungsprobleme!]]></Text>
+			<Text LcId="1033"><![CDATA[Interface cast from IObject to IPartTrackingData failed! Please check for memory issues!]]></Text>
+		</Text>
+		<Text TxtId="CycleTimeRecorderQueryInterfacFailed">
+			<Text LcId="1031"><![CDATA[Interface-Cast von IObject zu ICycleTimeData fehlgeschlagen! Bitte überprüfen Sie mögliche Speicherverwaltungsprobleme!]]></Text>
+			<Text LcId="1033"><![CDATA[Interface cast from IObject to ICycleTimeData failed! Please check for memory issues!]]></Text>
+		</Text>
+		<Text TxtId="MeasurementRecorderQueryInterfaceFailed">
+			<Text LcId="1031"><![CDATA[Interface-Cast von IObject zu IMeasurementData fehlgeschlagen! Bitte überprüfen Sie mögliche Speicherverwaltungsprobleme!]]></Text>
+			<Text LcId="1033"><![CDATA[Interface cast from IObject to IMeasurementData failed! Please check for memory issues!]]></Text>
+		</Text>
+		<Text TxtId="PartTrackingMaxQueueSize">
+			<Text LcId="1031"><![CDATA[Die maximal konfigurierte Kapazität der Warteschlange für Teiledatensätze wurde für diesen Datenschreiber erreicht! Bitte stellen Sie sicher, dass die Datensätze gelesen werden oder erhöhen Sie den Parameter in den Einstellungen!]]></Text>
+			<Text LcId="1033"><![CDATA[The maximum configured queue size for part tracking datasets has been reached for this recorder! Please ensure that the datasets are read or increase the parameter in the settings!]]></Text>
+		</Text>
+		<Text TxtId="CycleTimeMaxQueueSize">
+			<Text LcId="1031"><![CDATA[Die maximal konfigurierte Kapazität der Warteschlange für Taktzeiten wurde für diesen Datenschreiber erreicht! Bitte stellen Sie sicher, dass die Datensätze gelesen werden oder erhöhen Sie den Parameter in den Einstellungen!]]></Text>
+			<Text LcId="1033"><![CDATA[The maximum configured queue size for cycle time datasets has been reached for this recorder! Please ensure that the datasets are read or increase the parameter in the settings!]]></Text>
+		</Text>
+		<Text TxtId="MeasurementsMaxQueueSize">
+			<Text LcId="1031"><![CDATA[Die maximal konfigurierte Kapazität der Warteschlange für Messwerte wurde für diesen Datenschreiber erreicht! Bitte stellen Sie sicher, dass die Datensätze gelesen werden oder erhöhen Sie den Parameter in den Einstellungen!]]></Text>
+			<Text LcId="1033"><![CDATA[The maximum configured queue size for measurements has been reached for this recorder! Please ensure that the datasets are read or increase the parameter in the settings!]]></Text>
+		</Text>
+	</Translations>
+	<DataTypes>
+		<DataType>
+			<Name GUID="{587510DD-8AD9-4809-A686-A465C2119C73}">MemoryErrors</Name>
+			<DisplayName TxtId=""><![CDATA[NewEventClass_DisplayText]]></DisplayName>
+			<EventId>
+				<Name Id="1">PartTrackerQueryInterfacFailed</Name>
+				<DisplayName TxtId=""><![CDATA[PartTrackerQueryInterfacFailed]]></DisplayName>
+				<Severity>Critical</Severity>
+			</EventId>
+			<EventId>
+				<Name Id="2">CycleTimeRecorderQueryInterfacFailed</Name>
+				<DisplayName TxtId=""><![CDATA[CycleTimeRecorderQueryInterfacFailed]]></DisplayName>
+				<Severity>Critical</Severity>
+			</EventId>
+			<EventId>
+				<Name Id="3">MeasurementRecorderQueryInterfaceFailed</Name>
+				<DisplayName TxtId=""><![CDATA[MeasurementRecorderQueryInterfaceFailed]]></DisplayName>
+				<Severity>Critical</Severity>
+			</EventId>
+			<EventId>
+				<Name Id="4">PartTrackingMaxQueueSize</Name>
+				<DisplayName TxtId=""><![CDATA[PartTrackingMaxQueueSize]]></DisplayName>
+				<Severity>Error</Severity>
+			</EventId>
+			<EventId>
+				<Name Id="5">CycleTimeMaxQueueSize</Name>
+				<DisplayName TxtId=""><![CDATA[CycleTimeMaxQueueSize]]></DisplayName>
+				<Severity>Error</Severity>
+			</EventId>
+			<EventId>
+				<Name Id="6">MeasurementsMaxQueueSize</Name>
+				<DisplayName TxtId=""><![CDATA[MeasurementsMaxQueueSize]]></DisplayName>
+				<Severity>Error</Severity>
+			</EventId>
+			<Hides>
+				<Hide GUID="{EC07CA41-C075-44DF-8DE5-C41D6A3014CD}"/>
+				<Hide GUID="{BD98F1CC-179A-4292-B8F1-5C112CA7D894}"/>
+				<Hide GUID="{08AC4EAB-2F63-4AAD-90CF-B04341DA63C7}"/>
+				<Hide GUID="{4AE94F56-90CF-4D0F-877D-72BFF4703E58}"/>
+				<Hide GUID="{6DC8C393-A7AC-4C77-B237-1D66F48794E9}"/>
+			</Hides>
+		</DataType>
+	</DataTypes>
+</TcModuleClass>

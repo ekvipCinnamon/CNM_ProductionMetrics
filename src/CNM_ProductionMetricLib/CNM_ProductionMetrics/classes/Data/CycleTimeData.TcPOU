@@ -1,0 +1,119 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="CycleTimeData" Id="{00d5b650-49aa-4095-8d4d-d769c2b8c057}" SpecialFunc="None">
+    <Declaration><![CDATA[(*
+
+## Short summary
+
+This class serves as a pure data transfer object and can be used to create a new cycle time data set.
+An instance of this class can be appended to a production data set list.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+{attribute 'enable_dynamic_creation'}
+FUNCTION_BLOCK CycleTimeData EXTENDS CNM_AbstractObject.Object IMPLEMENTS CNM_ProductionMetricInterfaces.ICycleTimeData
+VAR
+	data :CNM_ProductionMetricInterfaces.CycleTimeDataStruct;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Property Name="className" Id="{d1462d66-7897-42da-bb75-4b05e78c268b}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This abstract property returns the class name of the concrete object, 
+which is useful for logging/debugging purpose or to check the class name
+for ``__DELETE`` in factories (sometimes it's necessary to do more 
+than just to free the memory).
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+PROPERTY className : CNM_AbstractObject.ClassName
+]]></Declaration>
+      <Get Name="Get" Id="{ddb9cc25-0b49-420c-9dc0-035291eb29a3}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[className := 'CycleTimeData';]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="dataset" Id="{8bed2b64-3ef4-4149-84b2-d263f7377774}">
+      <Declaration><![CDATA[PROPERTY dataset : CNM_ProductionMetricInterfaces.CycleTimeDataStruct]]></Declaration>
+      <Get Name="Get" Id="{e666eed8-1bca-40f8-969c-9e2481852e37}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[dataset := THIS^.data;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="FB_init" Id="{efa3257d-050a-4375-9be0-a4e28c3fb22f}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+The constructor ``FB_init`` is needed to create an unique hash code.
+The hash code is a pseudo random number create with a [xorshift](https://en.wikipedia.org/wiki/Xorshift) algorithm.
+It can be overwritten on derivations, because it will be called implicit, ``SUPER^.FB_init()`` is not required.
+For more information check: [Behavoir with derived function blocks](https://infosys.beckhoff.com/content/1033/tc3_plc_intro/5482088715.html?id=6983869892358031022)
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+
+
+*)
+METHOD FB_init : BOOL
+VAR_INPUT
+	(* if TRUE, the retain variables are initialized (warm start / cold start)*)
+	bInitRetains	: BOOL;
+	(* if TRUE, the instance afterwards gets moved into the copy code (online change) *)
+	bInCopyCode	: BOOL;
+	(* the data set this instance should capsulate *)
+	data :CNM_ProductionMetricInterfaces.CycleTimeDataStruct;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^.data := data;
+]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

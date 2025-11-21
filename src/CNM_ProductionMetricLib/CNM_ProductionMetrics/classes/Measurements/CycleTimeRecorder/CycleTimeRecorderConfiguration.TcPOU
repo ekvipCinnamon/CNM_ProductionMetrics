@@ -1,0 +1,106 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="CycleTimeRecorderConfiguration" Id="{e53a104d-d70c-46aa-9137-d54b33709f10}" SpecialFunc="None">
+    <Declaration><![CDATA[(* 
+## Short summary
+
+This class is a data transfer object for configurable cycle time recorder attributes. 
+It is intended to be uses within a fluid configuration interface. 
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2025 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+FUNCTION_BLOCK CycleTimeRecorderConfiguration EXTENDS DefaultMeasurementConfiguration IMPLEMENTS CNM_ProductionMetricInterfaces.ICycleTimeConfiguration
+VAR
+	configuredTargetCycleTime :LTIME;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Property Name="className" Id="{5b3c2050-1491-4137-813d-69099ec07532}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This abstract property returns the class name of the concrete object, 
+which is useful for logging/debugging purpose or to check the class name
+for ``__DELETE`` in factories (sometimes it's necessary to do more 
+than just to free the memory).
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+PROPERTY className : CNM_AbstractObject.ClassName
+]]></Declaration>
+      <Get Name="Get" Id="{db212f4d-fd9a-49fe-add5-92f72a479960}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[className := 'CycleTimeRecorderConfiguration';]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="targetCycleTime" Id="{00ba80c0-ada5-427e-96a3-9bdb8c351a97}">
+      <Declaration><![CDATA[(* 
+## Short summary
+
+This property can be used to set and read the current target cycle time for a product cycle of a single part.
+The target cycle time will be written into every measurement entry and is used to mark cycle time exceedances.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2025 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+PROPERTY targetCycleTime : LTIME
+]]></Declaration>
+      <Get Name="Get" Id="{4e8a7b3f-7676-4747-9d94-094f61a93fba}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[targetCycleTime := THIS^.configuredTargetCycleTime;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{a4f0cf7e-2142-4a26-a365-27c7ece0a749}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[THIS^.configuredTargetCycleTime := targetCycleTime;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+  </POU>
+</TcPlcObject>

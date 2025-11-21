@@ -1,0 +1,133 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="CycleTimeStartCycleCommand" Id="{06c4b5f6-e950-43ce-9100-23bcbf134d5c}" SpecialFunc="None">
+    <Declaration><![CDATA[(*
+## Short summary
+
+This command can be used to set the cycle start timestamp manually.
+
+**Attention:** If only the captureCurrentCycle method is called, the start timestamp will be set automatically when the previous cycle is done.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2025 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+FUNCTION_BLOCK CycleTimeStartCycleCommand EXTENDS CNM_AbstractObject.Object IMPLEMENTS CNM_CommandInterfaces.ISingleAttempt
+VAR
+	recorder :CNM_ProductionMetricInterfaces.ICycleTimeRecorder;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Property Name="className" Id="{fb2fe4ef-abfe-4392-b38c-b70dec0f43a7}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This abstract property returns the class name of the concrete object, 
+which is useful for logging/debugging purpose or to check the class name
+for ``__DELETE`` in factories (sometimes it's necessary to do more 
+than just to free the memory).
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+PROPERTY className : CNM_AbstractObject.ClassName
+]]></Declaration>
+      <Get Name="Get" Id="{808b9189-752a-4732-b976-4b26520d4e0c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[className := 'CNM_ProductionMetrics.CycleTimeStartCycleCommand';
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="invoke" Id="{545abbb8-2fcc-4128-9b2c-a7a4affa3e48}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+Invokes the action associated with this interface.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2024 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+
+
+*)
+METHOD invoke : CNM_ReturnTypes.SingleExecutionResult
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF THIS^.isObjectValid(THIS^.recorder) THEN
+	invoke := THIS^.recorder.startCycle();
+ELSE
+	invoke := CNM_ReturnTypes.SingleExecutionResult.ABORTED;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="setRecorder" Id="{a6cdd644-7956-48a9-bbe4-5beaed2f9c1d}">
+      <Declaration><![CDATA[(*
+## Short summary
+
+This methods sets the cycletime recorder interface on which the command is executed.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2025 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+METHOD setRecorder
+VAR_INPUT
+	recorder :CNM_ProductionMetricInterfaces.ICycleTimeRecorder;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF THIS^.isObjectValid(recorder) THEN
+	THIS^.recorder := recorder;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

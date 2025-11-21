@@ -1,0 +1,172 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="PartTrackingCommands" Id="{db633212-4d03-4535-aa00-3ab146898a5e}" SpecialFunc="None">
+    <Declaration><![CDATA[(* 
+## Short summary
+
+This class is a fluent interface that provides single attempt commands, which can be evaluated by a cycle manager instance.
+### Example 
+```
+	
+	// execute command when leaving a step 
+	cycleManager.leave(
+		partTracker.commands.partProcessingDone(
+			partIdentifier := 'Part123',
+			nokReason := 0,
+			additionalMessage := 'SPC Part'
+		)
+	);  
+```
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2025 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+	
+*)
+
+FUNCTION_BLOCK PartTrackingCommands EXTENDS CNM_AbstractObject.Object IMPLEMENTS CNM_ProductionMetricInterfaces.IPartTrackingRecorderCommands
+VAR
+	startProcessing :PartTrackingProcssingStartedCommand;
+	processingDone :PartTrackingProcssingDoneCommand;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Property Name="className" Id="{8675ce4b-7703-4bc4-8869-69e0068121aa}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This abstract property returns the class name of the concrete object, 
+which is useful for logging/debugging purpose or to check the class name
+for ``__DELETE`` in factories (sometimes it's necessary to do more 
+than just to free the memory).
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+PROPERTY className : CNM_AbstractObject.ClassName
+]]></Declaration>
+      <Get Name="Get" Id="{8352256e-6937-42d4-9ddd-2c638f166749}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ className := 'CNM_ProductionMetrics.PartTrackingCommands';
+ ]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="partProcessingDone" Id="{47e33f52-c5a6-4093-8a7d-6b0115f8cada}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This command creates a part counter dataset for the currenttly processed part.
+The part will be counted as OK part if the nokReason is set to 0 and not OK otherwise.
+The additionalMessage can be used to provide additional information, e.g. SPC part or measurements that are out of the permissible range. 
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2025 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+METHOD partProcessingDone : CNM_CommandInterfaces.ISingleAttempt
+VAR_INPUT
+	(* the part number as string *)
+	partIdentifier	: Tc2_System.T_MaxString;
+	(* if not 0, the record will be marked as not OK part *)
+	nokReason	: DWORD;
+	(* can be used to provide additional informations for the record, e.g. voltage too low *)
+	additionalMessage	: Tc2_System.T_MaxString;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^.processingDone.setParameters(
+	partIdentifier := partIdentifier,
+	nokReason := nokReason,
+	additionalMessage := additionalMessage
+);
+partProcessingDone := THIS^.processingDone;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="partProcessingStarted" Id="{9dfb3842-aa5b-4bc2-934b-6014213ef7c2}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This command starts a new process cycle and sets the start time stamp for the corresponding partIdentifier.
+
+**Attention:** calling this method clears the currently set part data, e.g. if the last process cycle couldn't be finished.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2025 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+METHOD partProcessingStarted : CNM_CommandInterfaces.ISingleAttempt
+VAR_INPUT
+	(* the part number as string *)
+	partIdentifier	: Tc2_System.T_MaxString;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^.startProcessing.setParameters(
+	partIdentifier := partIdentifier
+);
+partProcessingStarted := THIS^.startProcessing;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="setRecorder" Id="{5437ae42-e636-4d94-83f3-29eb84c4d5e6}">
+      <Declaration><![CDATA[METHOD INTERNAL setRecorder : BOOL
+VAR_INPUT
+	recorder :CNM_ProductionMetricInterfaces.IPartTracker;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF THIS^.isObjectValid(recorder) THEN
+	THIS^.startProcessing.setRecorder(recorder);
+	THIS^.processingDone.setRecorder(recorder);
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

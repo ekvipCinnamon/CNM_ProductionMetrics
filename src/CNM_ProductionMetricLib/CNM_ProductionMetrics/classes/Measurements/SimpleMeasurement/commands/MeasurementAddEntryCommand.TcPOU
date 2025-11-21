@@ -1,0 +1,171 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="MeasurementAddEntryCommand" Id="{144f2467-47e7-4325-b6ee-6ff4b8b2d3f7}" SpecialFunc="None">
+    <Declaration><![CDATA[(*
+## Short summary
+
+This command can be used to create and store a new measurement data set.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2025 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+FUNCTION_BLOCK MeasurementAddEntryCommand EXTENDS CNM_AbstractObject.Object IMPLEMENTS CNM_CommandInterfaces.ISingleAttempt
+VAR
+	recorder :CNM_ProductionMetricInterfaces.IMeasurementRecorder;
+	(* product identifier for that specific part *)
+	partIdentifier	:Tc2_System.T_MaxString;
+	(* name of the measurement, e.g. label position, cell voltage, oven temperature *)
+	nameMeasurement	: Tc2_System.T_MaxString;
+	(* unit of the measurement, e.g. mm, V, °C *)
+	unit	: CNM_ProductionMetricInterfaces.UnitString;
+	(* Permissible value range of the measurement for OK parts*)
+	range	: CNM_ProductionMetricInterfaces.MeasurementRangeStruct;
+	(* value of the measurement *)
+	value	: LREAL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Property Name="className" Id="{fdb0f910-57be-4107-aad2-e2b6a78c1e0d}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This abstract property returns the class name of the concrete object, 
+which is useful for logging/debugging purpose or to check the class name
+for ``__DELETE`` in factories (sometimes it's necessary to do more 
+than just to free the memory).
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+PROPERTY className : CNM_AbstractObject.ClassName
+]]></Declaration>
+      <Get Name="Get" Id="{f33d5b17-2b48-4477-b5d1-cc7aadc99025}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[className := 'CNM_ProductionMetrics.CycleTimeStartCycleCommand';
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="invoke" Id="{92a344b2-dd6c-4b47-addb-626601c1a88e}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+Invokes the action associated with this interface.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2024 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+
+
+*)
+METHOD invoke : CNM_ReturnTypes.SingleExecutionResult
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF THIS^.isObjectValid(THIS^.recorder) THEN
+	invoke := THIS^.recorder.addMeasurementEntry(
+		partIdentifier := THIS^.partIdentifier,
+		name := THIS^.nameMeasurement,
+		unit := THIS^.unit,
+		range := THIS^.range,
+		value := THIS^.value
+	);
+ELSE
+	invoke := CNM_ReturnTypes.SingleExecutionResult.ABORTED;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="setParameters" Id="{d2bb7239-ebdd-492d-b25f-48e8c5b01a0d}">
+      <Declaration><![CDATA[METHOD INTERNAL setParameters
+VAR_INPUT
+	(* product identifier for that specific part *)
+	partIdentifier	:Tc2_System.T_MaxString;
+	(* name of the measurement, e.g. label position, cell voltage, oven temperature *)
+	name	: Tc2_System.T_MaxString;
+	(* unit of the measurement, e.g. mm, V, °C *)
+	unit	: CNM_ProductionMetricInterfaces.UnitString;
+	(* Permissible value range of the measurement for OK parts*)
+	range	: CNM_ProductionMetricInterfaces.MeasurementRangeStruct;
+	(* value of the measurement *)
+	value	: LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^.partIdentifier := partIdentifier;
+THIS^.nameMeasurement := name;
+THIS^.unit := unit;
+THIS^.range := range;
+THIS^.value := value;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="setRecorder" Id="{51c675e0-2f63-406d-a0e9-4a5575d504a9}">
+      <Declaration><![CDATA[(*
+## Short summary
+
+This methods sets the cycletime recorder interface on which the command is executed.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2025 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+METHOD setRecorder
+VAR_INPUT
+	recorder :CNM_ProductionMetricInterfaces.IMeasurementRecorder;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF THIS^.isObjectValid(recorder) THEN
+	THIS^.recorder := recorder;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

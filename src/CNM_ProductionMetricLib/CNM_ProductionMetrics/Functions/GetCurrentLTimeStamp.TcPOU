@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="GetCurrentLTimeStamp" Id="{dc34881e-e2c0-474a-bdf2-c096b8c63f57}" SpecialFunc="None">
+    <Declaration><![CDATA[(* 
+The issue when getting timestamps: two different base times
+
+The function F_GetSystemTime returns the current time in 100 nanosecond steps as ULINT since 1.1.1601 (Windows base time)
+The LDATE_AND_TIME type starts on the UNIX base time - 1.1.1970. 
+  
+To get the correct time in the end, we have to subtract the difference of 369 years or 11644473600 seconds.
+  *)
+
+FUNCTION GetCurrentLTimeStamp : LDATE_AND_TIME
+VAR CONSTANT
+	(* 369 years in seconds, the difference between UNIX starttime (1970) and windows starttime (1601) *)
+	CORRECTION	: ULINT := 11644473600;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(* current time in 100 nanoseconds since 1970 * 100  -  the correction in nanoseconds *)
+GetCurrentLTimeStamp := TO_LDT(F_GetSystemTime()*100 - CORRECTION*TO_ULINT(1E9));
+
+]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

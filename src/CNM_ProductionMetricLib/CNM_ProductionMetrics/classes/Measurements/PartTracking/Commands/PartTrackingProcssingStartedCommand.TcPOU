@@ -1,0 +1,148 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="PartTrackingProcssingStartedCommand" Id="{3e660bda-4a90-4243-9984-771471bdee78}" SpecialFunc="None">
+    <Declaration><![CDATA[(*
+## Short summary
+
+This command starts a new process cycle and sets the start time stamp for the corresponding partIdentifier.
+
+**Attention:** calling this method clears the currently set part data, e.g. if the last process cycle couldn't be finished.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2025 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+FUNCTION_BLOCK PartTrackingProcssingStartedCommand EXTENDS CNM_AbstractObject.Object IMPLEMENTS CNM_CommandInterfaces.ISingleAttempt
+VAR
+	recorder :CNM_ProductionMetricInterfaces.IPartTracker;
+	partIdentifier :Tc2_System.T_MaxString;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Property Name="className" Id="{2285a54f-5bd0-444d-b8e7-25848e4966bb}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This abstract property returns the class name of the concrete object, 
+which is useful for logging/debugging purpose or to check the class name
+for ``__DELETE`` in factories (sometimes it's necessary to do more 
+than just to free the memory).
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+PROPERTY className : CNM_AbstractObject.ClassName
+]]></Declaration>
+      <Get Name="Get" Id="{5a8053e1-cacd-4e71-958c-2d0c2152a3ca}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[className := 'CNM_ProductionMetrics.PartTrackingProcssingStartedCommand';
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="invoke" Id="{07fc5267-6c81-4b08-aa00-b278c6d8dfbd}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+Invokes the action associated with this interface.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2024 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+
+
+*)
+METHOD invoke : CNM_ReturnTypes.SingleExecutionResult
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF THIS^.isObjectValid(THIS^.recorder) THEN
+	invoke := THIS^.recorder.setPartProcessingStarted(
+		partIdentifier := THIS^.partIdentifier
+	);
+ELSE
+	invoke := CNM_ReturnTypes.SingleExecutionResult.ABORTED;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="setParameters" Id="{62bece92-5ae0-4c26-833e-1fc227cc01a6}">
+      <Declaration><![CDATA[METHOD INTERNAL setParameters
+VAR_INPUT
+	(* the part number as string *)
+	partIdentifier :Tc2_System.T_MaxString;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^.partIdentifier := partIdentifier;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="setRecorder" Id="{ce399cf5-de94-431a-95ce-4f50fcc1bb4e}">
+      <Declaration><![CDATA[(*
+## Short summary
+
+This methods sets the parttracking recorder interface on which the command is executed.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2025 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+METHOD INTERNAL setRecorder
+VAR_INPUT
+	recorder :CNM_ProductionMetricInterfaces.IPartTracker;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF THIS^.isObjectValid(recorder) THEN
+	THIS^.recorder := recorder;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

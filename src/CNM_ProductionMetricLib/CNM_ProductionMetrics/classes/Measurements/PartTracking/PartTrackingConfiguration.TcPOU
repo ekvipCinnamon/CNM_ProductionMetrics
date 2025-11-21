@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="PartTrackingConfiguration" Id="{396e0dca-e4c6-44cf-a657-378e4a74bfdf}" SpecialFunc="None">
+    <Declaration><![CDATA[(* 
+## Short summary
+
+This class is a data transfer object for configurable part data attributes. 
+It is intended to be uses within a fluid configuration interface. 
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2025 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+FUNCTION_BLOCK PartTrackingConfiguration EXTENDS CycleTimeRecorderConfiguration IMPLEMENTS CNM_ProductionMetricInterfaces.IPartTrackerConfiguration
+VAR
+	configuredOrder :Tc2_System.T_MaxString;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Property Name="className" Id="{b5b1d04e-0ea7-43fd-99a6-d64ee5a1c4f1}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This abstract property returns the class name of the concrete object, 
+which is useful for logging/debugging purpose or to check the class name
+for ``__DELETE`` in factories (sometimes it's necessary to do more 
+than just to free the memory).
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+PROPERTY className : CNM_AbstractObject.ClassName
+]]></Declaration>
+      <Get Name="Get" Id="{44707a14-3b27-484f-b03d-3a0a2980c4f8}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[className := 'PartCounterConfiguration';]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="order" Id="{d2efa4e0-ba0f-43b7-a04f-e555d5f8a7cc}">
+      <Declaration><![CDATA[(* 
+## Short summary
+
+This property can be used to set and read the current batch number as string.
+The batch number will be written into every measurement entry.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2025 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+PROPERTY order : Tc2_System.T_MaxString
+]]></Declaration>
+      <Get Name="Get" Id="{537de176-de0e-48c8-b20e-6c3c19c79e01}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[order := THIS^.configuredOrder;
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{470fcca2-96da-4aae-a41d-c37c3d51b3d0}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[THIS^.configuredOrder := order;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,143 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="MeasurementRecorderCommands" Id="{9c4c8f15-210e-45a3-a9d7-39cbce296070}" SpecialFunc="None">
+    <Declaration><![CDATA[(* 
+## Short summary
+
+This class is a collection of cycle time recorder commands that provides a fluent interface that provides single attempt commands, which can be evaluated by a cycle manager instance.
+### Example 
+```
+	
+	// execute command when leaving a step 
+	cycleManager.leave(
+		measurement.commands.addMeasurementEntry(
+			partIdentifier	:= 'Part123',
+			name := 'Voltage Check',
+			unit := 'V',
+			range := productType.VoltageCheck.Range,
+			value := 3.14
+		)
+	); 
+```	
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2025 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+	
+*)
+
+FUNCTION_BLOCK MeasurementRecorderCommands EXTENDS CNM_AbstractObject.Object IMPLEMENTS CNM_ProductionMetricInterfaces.IMeasurementRecorderCommands
+VAR
+	addMeasurementCommand :MeasurementAddEntryCommand;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="addMeasurement" Id="{9c0f6fa1-89ed-402c-af72-8e6a915fa209}">
+      <Declaration><![CDATA[(*
+## Short summary
+
+This command creates a new measurement entry and queues it for the database insection.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2025 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+METHOD addMeasurement : CNM_CommandInterfaces.ISingleAttempt
+VAR_INPUT
+	(* product identifier for that specific part *)
+	partIdentifier	: Tc2_System.T_MaxString;
+	(* name of the measurement, e.g. label position, cell voltage, oven temperature *)
+	name	: Tc2_System.T_MaxString;
+	(* unit of the measurement, e.g. mm, V, °C *)
+	unit	: CNM_ProductionMetricInterfaces.UnitString;
+	(* Permissible value range of the measurement for OK parts*)
+	range	: CNM_ProductionMetricInterfaces.MeasurementRangeStruct;
+	(* value of the measurement *)
+	value	: LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^.addMeasurementCommand.setParameters(
+	partIdentifier := partIdentifier,
+	name := name,
+	unit := unit,
+	range := range,
+	value := value 
+);
+addMeasurement := THIS^.addMeasurementCommand;
+]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="className" Id="{ea01acad-7135-4b0e-aa1b-8abb224d58c6}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This abstract property returns the class name of the concrete object, 
+which is useful for debugging purpose or to check the class name for 
+``__DELETE`` in factories (sometimes it's necessary to do more 
+than just to free the memory).
+
+**Attention:**: 
+	For derivations: **It is necessary that this property is overridden by the concrete class**
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+PROPERTY className : CNM_AbstractObject.ClassName
+]]></Declaration>
+      <Get Name="Get" Id="{960c34ba-e240-4c29-afbf-9db5f6faa277}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ className := 'CNM_ProductionMetrics.MeasurementRecorderCommands';
+ ]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="setRecorder" Id="{088ee8d5-b2c2-4ade-9ccb-69c6d2e5f838}">
+      <Declaration><![CDATA[METHOD INTERNAL setRecorder : BOOL
+VAR_INPUT
+	recorder :CNM_ProductionMetricInterfaces.IMeasurementRecorder;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF THIS^.isObjectValid(recorder) THEN
+	THIS^.addMeasurementCommand.setRecorder(recorder);
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

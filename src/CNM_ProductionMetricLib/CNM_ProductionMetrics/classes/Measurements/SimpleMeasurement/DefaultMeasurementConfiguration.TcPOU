@@ -1,0 +1,148 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="DefaultMeasurementConfiguration" Id="{c9bdff68-4d5a-4809-a892-b3a31ad62088}" SpecialFunc="None">
+    <Declaration><![CDATA[(* 
+## Short summary
+
+This class is a data transfer object that contains the default configuration properties for production measurement configurations.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2025 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+
+FUNCTION_BLOCK DefaultMeasurementConfiguration EXTENDS CNM_AbstractObject.Object IMPLEMENTS CNM_ProductionMetricInterfaces.IProductionMetricsConfiguration
+VAR
+	configuredProcess :Tc2_System.T_MaxString;
+	configuredProductType :Tc2_System.T_MaxString;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Property Name="className" Id="{e4b30192-035c-43a6-8b45-f191ebedf578}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This abstract property returns the class name of the concrete object, 
+which is useful for debugging purpose or to check the class name for 
+``__DELETE`` in factories (sometimes it's necessary to do more 
+than just to free the memory).
+
+**Attention:**: 
+	For derivations: **It is necessary that this property is overridden by the concrete class**
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+PROPERTY className : CNM_AbstractObject.ClassName
+]]></Declaration>
+      <Get Name="Get" Id="{d393fe4b-7d27-47ac-ab62-846c1477d382}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[className := 'AbstractMeasurementConfiguration';
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="process" Id="{d4773d0c-7289-48ec-8896-526276c54bcb}">
+      <Declaration><![CDATA[(* 
+## Short summary
+
+This property can be used to set and read the process number or name as string.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2025 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+PROPERTY FINAL process : Tc2_System.T_MaxString
+]]></Declaration>
+      <Get Name="Get" Id="{321b35a9-4154-4a99-9195-c0a3418da0ff}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[process := THIS^.configuredProcess;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{09ae334a-db76-4e6e-af52-12b5149230f0}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[THIS^.configuredProcess := process;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="productType" Id="{e29f8092-a4fb-4c4e-82db-101bffbd614b}">
+      <Declaration><![CDATA[(* 
+## Short summary
+
+This property can be used to set and read the current product type (TTNR/PTN) as string.
+The type will be written into every measurement entry.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2025 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+PROPERTY FINAL productType : Tc2_System.T_MaxString
+]]></Declaration>
+      <Get Name="Get" Id="{c829d402-47b7-4eaa-b507-c74bae677bd0}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[productType := THIS^.configuredProductType;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{e0e1df33-97f7-40fe-b8c4-13147180132e}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[THIS^.configuredProductType := productType;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+  </POU>
+</TcPlcObject>

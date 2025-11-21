@@ -1,0 +1,137 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="MeasurementData" Id="{563f05d6-9a9b-4428-a7ac-f5f319fa2fad}" SpecialFunc="None">
+    <Declaration><![CDATA[(*
+## Short summary
+
+This class serves as a pure data transfer object and can be used to create a new measurement data set.
+An instance of this class can be appended to a production data set list.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+{attribute 'enable_dynamic_creation'}
+FUNCTION_BLOCK MeasurementData EXTENDS CNM_AbstractObject.Object IMPLEMENTS CNM_ProductionMetricInterfaces.IMeasurementData
+VAR
+	data : CNM_ProductionMetricInterfaces.MeasurementEntryStruct;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Property Name="className" Id="{7c013fad-0bcb-42ce-9d36-00f7157ea545}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+This abstract property returns the class name of the concrete object, 
+which is useful for logging/debugging purpose or to check the class name
+for ``__DELETE`` in factories (sometimes it's necessary to do more 
+than just to free the memory).
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+PROPERTY className : CNM_AbstractObject.ClassName
+]]></Declaration>
+      <Get Name="Get" Id="{fe56de52-dc9c-47eb-83a8-443a41fd88b2}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[className := 'MeasurementData';]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="dataset" Id="{f63d205e-b68f-4232-8204-0561dae93cd9}">
+      <Declaration><![CDATA[(*
+## Short summary
+
+This property returns a measurement data set.
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2025 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+*)
+PROPERTY dataset : CNM_ProductionMetricInterfaces.MeasurementEntryStruct
+]]></Declaration>
+      <Get Name="Get" Id="{c5429a0b-ab5f-485e-84a4-461234b34e71}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[dataset := THIS^.data;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="FB_init" Id="{7f5a1007-d13e-4185-8e58-c47c32db1d48}">
+      <Declaration><![CDATA[(*
+
+## Short summary
+
+The constructor ``FB_init`` is needed to create an unique hash code.
+The hash code is a pseudo random number create with a [xorshift](https://en.wikipedia.org/wiki/Xorshift) algorithm.
+It can be overwritten on derivations, because it will be called implicit, ``SUPER^.FB_init()`` is not required.
+For more information check: [Behavoir with derived function blocks](https://infosys.beckhoff.com/content/1033/tc3_plc_intro/5482088715.html?id=6983869892358031022)
+
+.. <legal notes>
+
+legal notes
+=================
+| SPDX-FileCopyrightText: © 2022 ekvip automation GmbH <info@ekvip.de>
+| SPDX-License-Identifier: Apache-2.0
+| For details check: Apache-2.0_
+
+.. _Apache-2.0: https://www.apache.org/licenses/LICENSE-2.0
+
+.. </legal notes>
+
+
+
+*)
+METHOD FB_init : BOOL
+VAR_INPUT
+	(* if TRUE, the retain variables are initialized (warm start / cold start)*)
+	bInitRetains	: BOOL;
+	(* if TRUE, the instance afterwards gets moved into the copy code (online change) *)
+	bInCopyCode	: BOOL;
+	(* the data set this instance should capsulate *)
+	data :CNM_ProductionMetricInterfaces.MeasurementEntryStruct;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[THIS^.data := data;
+]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

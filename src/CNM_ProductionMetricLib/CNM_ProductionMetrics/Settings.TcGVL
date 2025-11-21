@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <GVL Name="Settings" Id="{edab1783-52c9-4f3b-957f-b97df5204a1b}" ParameterList="True">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL CONSTANT
+	(*
+	 	The size of the internal queue in the data recorders. 
+		when the queue is full, an alarm will be raised and no other 
+		dataset will be queued until the list gets emptied 
+	*)
+	QUEUE_SIZE_FOR_DATA_RECORDS_PER_RECORDER :UDINT := 3;
+END_VAR
+]]></Declaration>
+  </GVL>
+</TcPlcObject>
